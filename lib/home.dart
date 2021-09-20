@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:fooderlich/card1.dart';
-import 'package:fooderlich/card2.dart';
-// import 'package:fooderlich/card3.dart';
-import 'package:fooderlich/explore_card.dart';
+import 'package:fooderlich/screens/explore_screen.dart';
+import 'package:fooderlich/screens/recipes_screen.dart';
+import 'models/explore_recipe.dart';
+import 'components/components.dart';
 
 class Home extends StatefulWidget {
-  const Home({Key? key}) : super(key: key);
+  const Home({Key key}) : super(key: key);
+
   @override
-  _HomeState createState() {
-    return _HomeState();
-  }
+  _HomeState createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
   int _selectedIndex = 0;
+
   static List<Widget> pages = <Widget>[
-    Card1(),
-    Card2(),
-    Card3(),
+   ExploreScreen(),
+    RecipesScreen(),
+    Container(color:Colors.green),
   ];
 
   void _onItemTapped(int index) {
@@ -29,27 +29,22 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // 5
-      appBar: AppBar(
-          title: Center(
-              child: Text(
-        'Fooderlich',
-        style: Theme.of(context).textTheme.headline6,
-      ))),
-      body: pages[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        selectedItemColor: Theme.of(context).textSelectionTheme.selectionColor,
-        items: <BottomNavigationBarItem>[
-          const BottomNavigationBarItem(
-              icon: Icon(Icons.card_giftcard), label: 'Card'),
-          const BottomNavigationBarItem(
-              icon: Icon(Icons.card_giftcard), label: 'Card2'),
-          const BottomNavigationBarItem(
-              icon: Icon(Icons.card_giftcard), label: 'Card3'),
-        ],
-      ),
-    );
+        appBar: AppBar(
+            title: Text('Fooderlich',
+                style: Theme.of(context).textTheme.headline6)),
+        body: pages[_selectedIndex],
+        bottomNavigationBar: BottomNavigationBar(
+            selectedItemColor:
+                Theme.of(context).textSelectionTheme.selectionColor,
+            currentIndex: _selectedIndex,
+            onTap: _onItemTapped,
+            items: <BottomNavigationBarItem>[
+              const BottomNavigationBarItem(
+                  icon: Icon(Icons.explore), label: 'Explore'),
+              const BottomNavigationBarItem(
+                  icon: Icon(Icons.book), label: 'Recipes'),
+              const BottomNavigationBarItem(
+                  icon: Icon(Icons.list), label: 'To Buy'),
+            ]));
   }
 }
