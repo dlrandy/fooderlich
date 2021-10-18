@@ -1,70 +1,57 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 
-import 'fooderlich_theme.dart';
-import 'models/models.dart';
-import 'navigation/app_route_parser.dart';
-import 'navigation/app_router.dart';
+// import 'data/memory_repository.dart';
+import 'data/repository.dart';
 
-void main() {
-  runApp(
-    const Fooderlich(),
-  );
+import 'data/moor/moor_repository.dart';
+import 'network/recipe_service.dart';
+import 'network/service_interface.dart';
+import 'ui/main_screen.dart';
+
+Future<void> main() async {
+  _setupLogging();
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(const MyApp());
 }
 
-class Fooderlich extends StatefulWidget {
-  const Fooderlich({Key? key}) : super(key: key);
-
-  @override
-  _FooderlichState createState() => _FooderlichState();
+void _setupLogging() {
+  Logger.root.level = Level.ALL;
+  Logger.root.onRecord.listen((rec) {
+    print('${rec.level.name}: ${rec.time}: ${rec.message}');
+  });
 }
 
-class _FooderlichState extends State<Fooderlich> {
-  final _groceryManager = GroceryManager();
-  final _profileManager = ProfileManager();
-  final _appStateManager = AppStateManager();
-  late AppRouter _appRouter;
-  final routeParser = AppRouteParser();
+class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
 
-  @override
-  void initState() {
-    _appRouter = AppRouter(
-      appStateManager: _appStateManager,
-      groceryManager: _groceryManager,
-      profileManager: _profileManager,
-    );
-    super.initState();
-  }
-
+  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (context) => _groceryManager),
-        ChangeNotifierProvider(
-          create: (context) => _appStateManager,
+        providers: [
+          Provider<Repository>(
+            lazy: false,
+            create: (_) => MoorRepository(),
+          ),
+          Provider<ServiceInterface>(
+            create: (_) => RecipeService.create(),
+            lazy: false,
+          ),
+        ],
+        child: MaterialApp(
+          title: 'Recipes',
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData(
+          brightness: Brightness.light,
+          primaryColor: Colors.white,
+            primarySwatch: Colors.blue,
+            visualDensity: VisualDensity.adaptivePlatformDensity,
+          ),
+          home: const MainScreen(),
         ),
-        ChangeNotifierProvider(
-          create: (context) => _profileManager,
-        )
-      ],
-      child: Consumer<ProfileManager>(
-        builder: (context, profileManager, child) {
-          ThemeData theme;
-          if (profileManager.darkMode) {
-            theme = FooderlichTheme.dark();
-          } else {
-            theme = FooderlichTheme.light();
-          }
-          return MaterialApp.router(
-            theme: theme,
-            title: 'Fooderlich',
-            backButtonDispatcher: RootBackButtonDispatcher(),
-            routerDelegate: _appRouter,
-            routeInformationParser: routeParser,
-          );
-        },
-      ),
     );
   }
 }
